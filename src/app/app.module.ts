@@ -1,14 +1,18 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
-import { initializeApp,provideFirebaseApp } from '@angular/fire/app';
-import { provideFirestore,getFirestore } from '@angular/fire/firestore';
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { connectFirestoreEmulator, getFirestore, provideFirestore, enableMultiTabIndexedDbPersistence } from '@angular/fire/firestore';
 
 import { environment } from '../environments/environment';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
+let resolvePersistenceEnabled: (enabled: boolean) => void;
+export const persistenceEnabled = new Promise<boolean>(resolve => {
+  resolvePersistenceEnabled = resolve;
+});
 @NgModule({
   declarations: [
     AppComponent
