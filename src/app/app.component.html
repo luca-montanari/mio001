@@ -3,13 +3,17 @@
 <h1>Lista</h1>
 <div class="doc" *ngFor="let doc of docs$ | async">
     <h3>{{doc.code}}</h3>
+    <h4>{{doc.id}}</h4>
     {{doc.description}}
-    
+    <button (click)="eliminaDocumento(doc.id)">Elimina</button>
 </div>
 
 <div>
     <h3>Crea documento</h3>
     <form [formGroup]="form">
+        <div>
+            <input type="text" placeholder="Id" formControlName="id" readonly>
+        </div>
         <div>
             <input type="text" placeholder="Codice" formControlName="code">
         </div>
