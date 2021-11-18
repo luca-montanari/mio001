@@ -1,7 +1,7 @@
 import { AfterContentInit, AfterViewInit, Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 
-import { catchError, EMPTY, from, map, Observable } from 'rxjs';
+import { catchError, EMPTY, from, map, Observable, tap } from 'rxjs';
 
 import { Firestore, collection, collectionData, doc, docData, deleteDoc, addDoc, QueryDocumentSnapshot, DocumentData, SnapshotOptions, CollectionReference, DocumentReference } from '@angular/fire/firestore';
 
@@ -9,17 +9,17 @@ import { Doc } from './doc';
 
 const docConverter = {
     toFirestore(doc: Doc): DocumentData {
-        return { code: doc.code, description: doc.description };
+        return { code: doc.code, description: doc.description, category: doc.category };
     },
     fromFirestore(
         snapshot: QueryDocumentSnapshot,
         options: SnapshotOptions
     ): Doc {
         const data = snapshot.data(options)!;
-        const doc = {} as Doc;
-        doc.id = snapshot.id;        
-        doc.code = data['code'];
-        doc.description = data['description'];
+        const doc = {
+            id: snapshot.id,
+            ...<any>data
+        }
         return doc;
     }
 };
@@ -37,7 +37,8 @@ export class AppComponent implements AfterContentInit, AfterViewInit {
     form = this.formBuilder.group({
         id: [''],
         code: ['', [Validators.required]],
-        description: ['', [Validators.required]]
+        description: ['', [Validators.required]],
+        category: ['', [Validators.required]],
     });
 
     constructor(private firestore: Firestore,
@@ -69,7 +70,9 @@ export class AppComponent implements AfterContentInit, AfterViewInit {
         const doc$: Observable<DocumentReference> = from(addDoc<Doc>(this.collectionDocs, this.form.value))
         doc$
             .pipe(
-                map(aaa => aaa),
+                tap(
+                    value => console.log('prima di creare un documento', value.withConverter(docConverter))
+                ),  
                 catchError(err => {
                     console.log('errore', err)
                     return EMPTY;                    

@@ -12,18 +12,33 @@
     <h3>Crea documento</h3>
     <form [formGroup]="form">
         <div>
-            <input type="text" placeholder="Id" formControlName="id" readonly>
+            <label for="id">Id:</label>
+            <input type="text" placeholder="Id" formControlName="id" id="id" name="id" readonly>
         </div>
         <div>
-            <input type="text" placeholder="Codice" formControlName="code">
+            <label for="code">Codice:</label>
+            <input type="text" placeholder="Codice" formControlName="code" id="code" name="code">
         </div>
         <div>
-            <input type="text" placeholder="Descrizione" formControlName="description">
+            <label for="description">Descrizione:</label>
+            <input type="text" placeholder="Descrizione" formControlName="description" id="description" name="description">
         </div>        
-        <button 
-            (click)="creaDocumento()"
-            [disabled]="form.invalid">
-            Crea documento
-        </button>
+        <label for="category">Categoria:</label>
+        <select name="category" id="category" formControlName="category">
+            <option value="cat1">cat1</option>
+            <option value="cat2">cat2</option>
+            <option value="cat3">cat3</option>
+        </select>
+        <br>
+        <div>
+            <button 
+                (click)="creaDocumento()"
+                [disabled]="form.invalid">
+                Crea documento
+            </button>
+        </div>
+        <div>
+            <p>{{form.value | json}}</p>
+        </div>
     </form>
 </div>
