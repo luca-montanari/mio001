@@ -1,9 +1,29 @@
 import { AfterContentInit, AfterViewInit, Component } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 
-import { catchError, EMPTY, from, map, Observable, tap } from 'rxjs';
+import { catchError, EMPTY, from, fromEventPattern, map, Observable, tap } from 'rxjs';
 
-import { Firestore, collection, collectionData, doc, docData, deleteDoc, addDoc, QueryDocumentSnapshot, DocumentData, SnapshotOptions, CollectionReference, DocumentReference } from '@angular/fire/firestore';
+import { 
+    Firestore, 
+    collection, 
+    collectionData, 
+    doc, 
+    docData, 
+    deleteDoc, 
+    addDoc, 
+    QueryDocumentSnapshot, 
+    DocumentData, 
+    SnapshotOptions, 
+    CollectionReference, 
+    DocumentReference, 
+    getDoc, 
+    fromRef,
+    query,
+    getDocs,
+    QueryConstraint
+} from '@angular/fire/firestore';
+
+// import { fromRef } from 'rxfire/firestore';
 
 import { Doc } from './doc';
 
@@ -56,9 +76,29 @@ export class AppComponent implements AfterContentInit, AfterViewInit {
         console.log('ngAfterContentInit');
     }
 
-    leggiTuttiIRecords() {
+    async leggiTuttiIRecords() {
+        
         this.collectionDocs = collection(this.firestore, 'docs').withConverter(docConverter);
         this.docs$ = collectionData<Doc>(this.collectionDocs);
+
+        const aaa = query(collection(this.firestore, 'docs')).withConverter(docConverter);
+        from(getDocs(aaa))
+            .subscribe(aaa => {
+                aaa.forEach((doc) => {                        
+                        console.log('pippo', doc.metadata, doc.ref, doc.data());                    
+                    });            
+            });
+
+
+        // const bbb = from(getDocs(aaa))
+        //     .pipe(
+        //         map(y => {
+        //             const ll = y.docs;
+        //             ll.
+        //         })
+        //     )
+        //     .subscribe(x => x);
+
     }
 
     creaDocumento() {
@@ -79,7 +119,22 @@ export class AppComponent implements AfterContentInit, AfterViewInit {
                 })
             )
             .subscribe(
-                value => console.log('documento creato', value)                
+                documentReference => {
+
+                    const ref1 = doc(this.firestore, "docs", documentReference.id).withConverter(docConverter);
+                    from(getDoc(ref1))
+                        .subscribe(
+                            documentSnapShot => console.log("AAA dati del documento creato", documentSnapShot.data())
+                        );
+
+                    const ref2 = fromRef(doc(this.firestore, "docs", documentReference.id), {
+                        includeMetadataChanges: false
+                    }).subscribe(x => console.log("BBB dati del documento creato", x.id, x.data()));
+
+                    // const ref3 = fromDocRef(doc(this.firestore, "docs", documentReference.id));
+
+                    console.log('documento creato', documentReference);
+                }
             );
     }
 
