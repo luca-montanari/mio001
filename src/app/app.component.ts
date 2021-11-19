@@ -20,7 +20,8 @@ import {
     fromRef,
     query,
     getDocs,
-    QueryConstraint
+    QueryConstraint,
+    setDoc
 } from '@angular/fire/firestore';
 
 // import { fromRef } from 'rxfire/firestore';
@@ -101,7 +102,7 @@ export class AppComponent implements AfterContentInit, AfterViewInit {
 
     }
 
-    creaDocumento() {
+    creaDocumentoConIdAutomatico() {
         console.log('creaDocumento', 'aaa', this.collectionDocs, this.form.value); 
         if (this.collectionDocs == null) {
             return;
@@ -136,6 +137,17 @@ export class AppComponent implements AfterContentInit, AfterViewInit {
                     console.log('documento creato', documentReference);
                 }
             );
+    }
+
+    creaDocumentoConIdCustom() {
+
+        const aaa = doc(this.firestore, 'docs', 'prova').withConverter(docConverter);
+
+        console.log('creaDocumentoConIdCustom', aaa);
+
+        from(setDoc(aaa, this.form.value))
+            .subscribe(i => console.log('fffffffffff', i));        
+
     }
 
     eliminaDocumento(id: string) {

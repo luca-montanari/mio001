@@ -13,7 +13,7 @@
     <form [formGroup]="form">
         <div>
             <label for="id">Id:</label>
-            <input type="text" placeholder="Id" formControlName="id" id="id" name="id" readonly>
+            <input type="text" placeholder="Id" formControlName="id" id="id" name="id">
         </div>
         <div>
             <label for="code">Codice:</label>
@@ -32,9 +32,16 @@
         <br>
         <div>
             <button 
-                (click)="creaDocumento()"
+                (click)="creaDocumentoConIdAutomatico()"
                 [disabled]="form.invalid">
-                Crea documento
+                Crea documento con id automatico
+            </button>
+        </div>
+        <div>
+            <button 
+                (click)="creaDocumentoConIdCustom()"
+                [disabled]="form.invalid">
+                Crea documento con id custom
             </button>
         </div>
         <div>
