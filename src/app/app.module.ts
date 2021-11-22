@@ -4,11 +4,14 @@ import { BrowserModule } from '@angular/platform-browser';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { connectFirestoreEmulator, getFirestore, provideFirestore, enableMultiTabIndexedDbPersistence } from '@angular/fire/firestore';
 
+import { MatTableModule } from '@angular/material/table';
+
 import { environment } from '../environments/environment';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 let resolvePersistenceEnabled: (enabled: boolean) => void;
 export const persistenceEnabled = new Promise<boolean>(resolve => {
@@ -34,6 +37,8 @@ export const persistenceEnabled = new Promise<boolean>(resolve => {
             );
             return firestore;
         }),
+        BrowserAnimationsModule,
+        MatTableModule,
     ],
     providers: [],
     bootstrap: [AppComponent]
