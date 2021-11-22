@@ -146,7 +146,7 @@ export class AppComponent implements AfterContentInit, AfterViewInit {
         console.log('creaDocumentoConIdCustom', aaa);
 
         from(setDoc(aaa, this.form.value))
-            .subscribe(i => console.log('fffffffffff', i));        
+            .subscribe(i => console.log('fffffffffffDDDD', i));        
 
     }
 
