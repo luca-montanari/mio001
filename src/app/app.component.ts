@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
-import { catchError, EMPTY, from, Observable, tap } from 'rxjs';
+import { catchError, EMPTY, from, Observable, share, shareReplay, Subscription, take, tap } from 'rxjs';
 
 import { 
     addDoc,
@@ -42,7 +42,7 @@ const docConverter = {
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
 
     displayedColumns: string[] = ['code', 'description', 'category'];
     dataToDisplay: Doc[] = [];  
@@ -52,14 +52,30 @@ export class AppComponent {
 
     constructor(private firestore: Firestore,
                 private dialog: MatDialog) {
+        console.log('@@@', 'AppComponent', 'constructor');
         this.collectionDocs = collection(this.firestore, 'docs').withConverter(docConverter);
         collectionData<Doc>(this.collectionDocs)
+            .pipe(
+                // shareReplay()                
+            )
             .subscribe(
-                records => this.dataSource.setData(records)
+                records => {
+                    console.log('@@@', 'AppComponent', 'constructor', 'ricevuti dati da mostrare nella griglia', records);
+                    this.dataSource.setData(records)
+                }                 
             );
+    }
+    
+    ngOnInit(): void {
+        console.log('@@@', 'AppComponent', 'ngOnInit');
+    }
+    
+    ngOnDestroy(): void {
+        console.log('@@@', 'AppComponent', 'ngOnDestroy');
     }
 
     CreaNuovoDoc() {
+        console.log('@@@', 'AppComponent', 'CreaNuovoDoc');
         const dialogConfig = new MatDialogConfig<CreateNewDocDialogComponent>();
         dialogConfig.disableClose = true;
         dialogConfig.autoFocus = true;
@@ -70,22 +86,22 @@ export class AppComponent {
         matDialogRef
             .afterClosed()
             .subscribe(newPartialdoc => {
-                console.log('AppComponent', 'CreaNuovoDoc', newPartialdoc);            
+                console.log('@@@', 'AppComponent', 'CreaNuovoDoc', 'subscribe', newPartialdoc);            
 
                 if (newPartialdoc) {
                     from(addDoc<Partial<Doc>>(this.collectionDocs, { ...newPartialdoc } ))
                     .pipe(
                         tap(
-                            value => console.log('AppComponent', 'CreaNuovoDoc', 'prima di creare un documento', value.withConverter(docConverter))
+                            value => console.log('@@@', 'AppComponent', 'CreaNuovoDoc', 'prima di creare un documento', value.withConverter(docConverter))
                         ),  
                         catchError(err => {
-                            console.log('errore', err)
+                            console.log('@@@', 'errore', err)
                             return EMPTY;                    
                         })
                     )                
                     .subscribe(
                         documentReference => {        
-                            console.log('AppComponent', 'CreaNuovoDoc', 'documento creato', documentReference);
+                            console.log('@@@', 'AppComponent', 'CreaNuovoDoc', 'documento creato', documentReference);
                         }
                     );                    
                 }
