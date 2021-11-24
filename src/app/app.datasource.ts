@@ -10,6 +10,7 @@ export class DocsDataSource extends DataSource<Doc> {
 
     constructor(initialData: Doc[]) {
         super();
+        this._dataStream.subscribe(ssss => console.log('dddddd', ssss));
         this.setData(initialData);
     }
 
