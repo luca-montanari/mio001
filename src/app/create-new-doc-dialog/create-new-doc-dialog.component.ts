@@ -1,4 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
+import { addDoc } from '@angular/fire/firestore';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -16,7 +17,7 @@ export class CreateNewDocDialogComponent implements OnInit {
     doc: Doc;
 
     constructor(
-        private matDialogRef: MatDialogRef<CreateNewDocDialogComponent>,
+        private matDialogRef: MatDialogRef<CreateNewDocDialogComponent, Partial<Doc>>,
         private formBuilder: FormBuilder,
         @Inject(MAT_DIALOG_DATA) doc: Doc
     ) {
@@ -37,12 +38,8 @@ export class CreateNewDocDialogComponent implements OnInit {
     }
 
     salva() {
-        console.log('CreateNewDocDialogComponent', 'chiusura con creazione', this.formGroup.value);
-        const changes = this.formGroup.value;
-        // this.coursesService.updateCourse(this.course.id, changes)
-        //     .subscribe(() => {
-        //         this.dialogRef.close(changes);
-        //     });
+        console.log('CreateNewDocDialogComponent', 'chiusura con creazione', this.formGroup.value);        
+        this.matDialogRef.close(this.formGroup.value);
     }
 
 }

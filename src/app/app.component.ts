@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 
+import { catchError, EMPTY, from, Observable, tap } from 'rxjs';
+
 import { 
+    addDoc,
     collection, 
     collectionData,
     CollectionReference,
@@ -8,10 +11,10 @@ import {
     Firestore,
     QueryDocumentSnapshot,
     SnapshotOptions, 
+    DocumentReference,
 } from '@angular/fire/firestore';
-import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
-import { Observable } from 'rxjs';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
 
 import { DocsDataSource } from './app.datasource';
 import { CreateNewDocDialogComponent } from './create-new-doc-dialog/create-new-doc-dialog.component';
@@ -57,19 +60,36 @@ export class AppComponent {
     }
 
     CreaNuovoDoc() {
-        const dialogConfig = new MatDialogConfig();
+        const dialogConfig = new MatDialogConfig<CreateNewDocDialogComponent>();
         dialogConfig.disableClose = true;
         dialogConfig.autoFocus = true;
         dialogConfig.minWidth = "400px";
         dialogConfig.data = null;
         dialogConfig.closeOnNavigation = false;
-        this.dialog.open(CreateNewDocDialogComponent, dialogConfig)
+        const matDialogRef: MatDialogRef<CreateNewDocDialogComponent, Partial<Doc>> = this.dialog.open<CreateNewDocDialogComponent>(CreateNewDocDialogComponent, dialogConfig);
+        matDialogRef
             .afterClosed()
-            .subscribe(val => {
-                console.log('appcomponent', 'close dialog', val);
-                if (val) {
-                    
+            .subscribe(newPartialdoc => {
+                console.log('AppComponent', 'CreaNuovoDoc', newPartialdoc);            
+
+                if (newPartialdoc) {
+                    from(addDoc<Partial<Doc>>(this.collectionDocs, { ...newPartialdoc } ))
+                    .pipe(
+                        tap(
+                            value => console.log('AppComponent', 'CreaNuovoDoc', 'prima di creare un documento', value.withConverter(docConverter))
+                        ),  
+                        catchError(err => {
+                            console.log('errore', err)
+                            return EMPTY;                    
+                        })
+                    )                
+                    .subscribe(
+                        documentReference => {        
+                            console.log('AppComponent', 'CreaNuovoDoc', 'documento creato', documentReference);
+                        }
+                    );                    
                 }
+
             });
     }
 
