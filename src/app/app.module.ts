@@ -1,17 +1,23 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { ReactiveFormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { connectFirestoreEmulator, getFirestore, provideFirestore, enableMultiTabIndexedDbPersistence } from '@angular/fire/firestore';
-
-import { MatTableModule } from '@angular/material/table';
 
 import { environment } from '../environments/environment';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { CreateNewDocDialogComponent } from './create-new-doc-dialog/create-new-doc-dialog.component';
+
 
 let resolvePersistenceEnabled: (enabled: boolean) => void;
 export const persistenceEnabled = new Promise<boolean>(resolve => {
@@ -19,7 +25,8 @@ export const persistenceEnabled = new Promise<boolean>(resolve => {
 });
 @NgModule({
     declarations: [
-        AppComponent
+        AppComponent,
+        CreateNewDocDialogComponent
     ],
     imports: [
         BrowserModule,
@@ -39,6 +46,10 @@ export const persistenceEnabled = new Promise<boolean>(resolve => {
         }),
         BrowserAnimationsModule,
         MatTableModule,
+        MatButtonModule,
+        MatDialogModule,
+        MatFormFieldModule,
+        MatInputModule
     ],
     providers: [],
     bootstrap: [AppComponent]

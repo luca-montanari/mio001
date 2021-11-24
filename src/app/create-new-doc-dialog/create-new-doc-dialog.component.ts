@@ -1,0 +1,48 @@
+import { Component, Inject, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+
+import { Doc } from '../doc';
+
+@Component({
+    selector: 'app-create-new-doc-dialog',
+    templateUrl: './create-new-doc-dialog.component.html',
+    styleUrls: ['./create-new-doc-dialog.component.scss']
+})
+export class CreateNewDocDialogComponent implements OnInit {
+
+    formGroup: FormGroup;
+    doc: Doc;
+
+    constructor(
+        private matDialogRef: MatDialogRef<CreateNewDocDialogComponent>,
+        private formBuilder: FormBuilder,
+        @Inject(MAT_DIALOG_DATA) doc: Doc
+    ) {
+        this.doc = doc;
+        this.formGroup = this.formBuilder.group({
+            code: ['', Validators.required],
+            description: ['', Validators.required],
+            category: ['', Validators.required],
+        });
+    }
+    
+    ngOnInit(): void {        
+    }
+    
+    annulla() {
+        console.log('CreateNewDocDialogComponent', 'chiusura senza creazione');
+        this.matDialogRef.close();
+    }
+
+    salva() {
+        console.log('CreateNewDocDialogComponent', 'chiusura con creazione', this.formGroup.value);
+        const changes = this.formGroup.value;
+        // this.coursesService.updateCourse(this.course.id, changes)
+        //     .subscribe(() => {
+        //         this.dialogRef.close(changes);
+        //     });
+    }
+
+}
