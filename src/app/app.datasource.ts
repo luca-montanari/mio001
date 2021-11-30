@@ -1,39 +1,39 @@
-import {DataSource} from '@angular/cdk/collections';
-import { collection, CollectionReference } from '@angular/fire/firestore';
+import { DataSource } from '@angular/cdk/collections';
 
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, of, ReplaySubject } from 'rxjs';
+
+import { collection, collectionData, CollectionReference, Firestore } from '@angular/fire/firestore';
 
 import { Doc } from './doc';
-import * as docConverter from './doc.converter'
+import docConverter from './doc.converter'
 
 export class DocsDataSource extends DataSource<Doc> {
 
-    private _dataStream = new BehaviorSubject<Doc[]>([]);
+    private _dataStream:  Observable<Doc[]> | null;
 
-    // constructor(initialData: Doc[]) {
-    //     super();
-    //     this._dataStream.subscribe(ssss => console.log('dddddd', ssss));
-    //     this.setData(initialData);
-    // }
-
-    constructor() {
-        super();        
+    constructor(private firestore: Firestore) {        
+        super();
+        console.log('@@@', 'DocsDataSource', 'constructor');
+        this._dataStream = null;
     }
 
     connect(): Observable<Doc[]> {
-        return this._dataStream.asObservable();
+        console.log('@@@', 'DocsDataSource', 'connect');
+        if (this._dataStream) {
+            return this._dataStream;        
+        } else {
+            return of([]);
+        }        
     }
 
     disconnect() { 
-        this._dataStream.complete();
+        console.log('@@@', 'DocsDataSource', 'disconnect');
     }
 
-    // setData(data: Doc[]) {
-    //     this._dataStream.next(data);
-    // }
     loadDocs() {
-        collectionDocs: CollectionReference<Doc> = collection(this.firestore, 'docs').withConverter(docConverter);
-        collectionData<Doc>(this.collectionDocs)
+        console.log('@@@', 'DocsDataSource', 'loadDocs');
+        const collectionDocs = collection(this.firestore, 'docs').withConverter(docConverter);
+        this._dataStream = collectionData<Doc>(collectionDocs);
     }
 
 }

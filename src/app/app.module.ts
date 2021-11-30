@@ -17,6 +17,7 @@ import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CreateNewDocDialogComponent } from './create-new-doc-dialog/create-new-doc-dialog.component';
+import { Test001Component } from './test001/test001.component';
 
 
 let resolvePersistenceEnabled: (enabled: boolean) => void;
@@ -26,7 +27,8 @@ export const persistenceEnabled = new Promise<boolean>(resolve => {
 @NgModule({
     declarations: [
         AppComponent,
-        CreateNewDocDialogComponent
+        CreateNewDocDialogComponent,
+        Test001Component
     ],
     imports: [
         BrowserModule,
