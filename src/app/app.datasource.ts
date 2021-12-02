@@ -2,7 +2,7 @@ import { DataSource } from '@angular/cdk/collections';
 
 import { BehaviorSubject, Observable, of, ReplaySubject } from 'rxjs';
 
-import { collection, collectionData, CollectionReference, Firestore } from '@angular/fire/firestore';
+import { collection, collectionData, CollectionReference, Firestore, orderBy, query } from '@angular/fire/firestore';
 
 import { Doc } from './doc';
 import docConverter from './doc.converter'
@@ -33,7 +33,8 @@ export class DocsDataSource extends DataSource<Doc> {
     loadDocs() {
         console.log('@@@', 'DocsDataSource', 'loadDocs');
         const collectionDocs = collection(this.firestore, 'docs').withConverter(docConverter);
-        this._dataStream = collectionData<Doc>(collectionDocs);
+        const queryOrderBy = query<Doc>(collectionDocs, orderBy('code'));
+        this._dataStream = collectionData<Doc>(queryOrderBy);
     }
 
 }

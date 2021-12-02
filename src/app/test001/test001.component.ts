@@ -81,4 +81,7 @@ export class Test001Component implements OnInit {
             });
     }
 
+    eliminaDocsSelezionati() {        
+    }
+
 }
