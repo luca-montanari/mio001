@@ -10,6 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { connectFirestoreEmulator, getFirestore, provideFirestore, enableMultiTabIndexedDbPersistence } from '@angular/fire/firestore';
@@ -54,7 +55,8 @@ export const persistenceEnabled = new Promise<boolean>(resolve => {
         MatFormFieldModule,
         MatInputModule,
         MatToolbarModule,
-        MatIconModule
+        MatIconModule,
+        MatCheckboxModule
     ],
     providers: [],
     bootstrap: [AppComponent]

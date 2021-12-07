@@ -10,7 +10,7 @@ import docConverter from './doc.converter'
 export class DocsDataSource extends DataSource<Doc> {
 
     private _dataStream:  Observable<Doc[]> | null;
-
+    
     constructor(private firestore: Firestore) {        
         super();
         console.log('@@@', 'DocsDataSource', 'constructor');

@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 
 import { catchError, EMPTY, from, Observable, share, shareReplay, Subscription, take, tap } from 'rxjs';
 
+import { SelectionModel } from '@angular/cdk/collections';
+
 import {
     addDoc,
     collection,
@@ -27,12 +29,13 @@ import docConverter from '../doc.converter'
     styleUrls: ['./test001.component.scss']
 })
 export class Test001Component implements OnInit {
-    
+
     displayedColumns: string[] = ['code', 'description', 'category'];
     dataSource: DocsDataSource | null;
+    selection = new SelectionModel<Doc>(true, []);
 
     constructor(private firestore: Firestore,
-                private dialog: MatDialog) { 
+        private dialog: MatDialog) {
         console.log('@@@', 'Test001Component', 'constructor');
         this.dataSource = null;
     }
@@ -59,29 +62,38 @@ export class Test001Component implements OnInit {
         matDialogRef
             .afterClosed()
             .subscribe(newPartialdoc => {
-                console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'subscribe', newPartialdoc);            
+                console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'subscribe', newPartialdoc);
                 if (newPartialdoc) {
                     const collectionDocs = collection(this.firestore, 'docs').withConverter(docConverter);
-                    from(addDoc<Partial<Doc>>(collectionDocs, { ...newPartialdoc } ))
-                    .pipe(
-                        tap(
-                            value => console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'prima di creare un documento', value)
-                        ),  
-                        catchError(err => {
-                            console.log('@@@', 'errore', err)
-                            return EMPTY;                    
-                        })
-                    )                
-                    .subscribe(
-                        documentReference => {        
-                            console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'documento creato', documentReference);
-                        }
-                    );                    
+                    from(addDoc<Partial<Doc>>(collectionDocs, { ...newPartialdoc }))
+                        .pipe(
+                            tap(
+                                value => console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'prima di creare un documento', value)
+                            ),
+                            catchError(err => {
+                                console.log('@@@', 'errore', err)
+                                return EMPTY;
+                            })
+                        )
+                        .subscribe(
+                            documentReference => {
+                                console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'documento creato', documentReference);
+                            }
+                        );
                 }
             });
     }
 
-    eliminaDocsSelezionati() {        
+    eliminaDocsSelezionati() {
+    }
+
+    isAllSelected() {
+        if (this.dataSource == null) {
+            return false;
+        }
+        const numSelected = this.selection.selected.length;
+        const numRows = this.dataSource.
+        return numSelected === numRows;
     }
 
 }
