@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 
 import { catchError, EMPTY, from, Observable, share, shareReplay, Subscription, take, tap } from 'rxjs';
 
 import { SelectionModel } from '@angular/cdk/collections';
+
+import { MatSort, Sort } from '@angular/material/sort';
 
 import {
     addDoc,
@@ -14,6 +16,10 @@ import {
     QueryDocumentSnapshot,
     SnapshotOptions,
     DocumentReference,
+    deleteDoc,
+    doc,
+    fromRef,
+    OrderByDirection
 } from '@angular/fire/firestore';
 
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
@@ -28,22 +34,35 @@ import docConverter from '../doc.converter'
     templateUrl: './test001.component.html',
     styleUrls: ['./test001.component.scss']
 })
-export class Test001Component implements OnInit {
+export class Test001Component implements OnInit, AfterViewInit {
 
-    displayedColumns: string[] = ['code', 'description', 'category'];
-    dataSource: DocsDataSource | null;
-    selection = new SelectionModel<Doc>(true, []);
+    @ViewChild(MatSort) sort!: MatSort;
+
+    displayedColumns: string[] = ['select', 'code', 'description', 'category'];
+    dataSource: DocsDataSource = new DocsDataSource(this.firestore);
+    selection = new SelectionModel<Doc>(true, [], true);
 
     constructor(private firestore: Firestore,
         private dialog: MatDialog) {
-        console.log('@@@', 'Test001Component', 'constructor');
-        this.dataSource = null;
+        console.log('@@@', 'Test001Component', 'constructor');        
+        this.selection.changed.asObservable().subscribe(selectionChanged => {
+            console.log('@@@', 'Test001Component', 'constructor', 'selectionChanged subscribe', selectionChanged);
+        });
     }
 
     ngOnInit(): void {
         console.log('@@@', 'Test001Component', 'ngOnInit');
-        this.dataSource = new DocsDataSource(this.firestore);
-        this.dataSource.loadDocs();
+        // this.dataSource = new DocsDataSource(this.firestore);
+        this.dataSource.loadDocs('code', 'asc');
+    }
+
+    ngAfterViewInit() {
+        console.log('@@@', 'Test001Component', 'ngAfterViewInit', this.sort.active, this.sort.direction);
+        // this.dataSource.sort = this.sort;
+        this.sort.sortChange.subscribe(() => {
+            console.log('@@@', 'Test001Component', 'ngAfterViewInit', 'sortChange', 'subscribe', this.sort, this.sort.active, this.sort.direction);            
+            this.dataSource.loadDocs(this.sort.active, this.sort.direction === 'asc' ? 'asc' : 'desc');
+        });
     }
 
     ngOnDestroy(): void {
@@ -85,15 +104,51 @@ export class Test001Component implements OnInit {
     }
 
     eliminaDocsSelezionati() {
+        console.log('@@@', 'Test001Component', 'eliminaDocsSelezionati', this.selection);
+        if (!this.selection.hasValue) {
+            console.log('@@@', 'Test001Component', 'eliminaDocsSelezionati', 'nessun elemento selezionato');
+            return;
+        }
+        for (let docDaEliminare of this.selection.selected) {
+            console.log('@@@', 'Test001Component', 'eliminaDocsSelezionati', 'eliminazione del record', docDaEliminare);
+            from(deleteDoc(doc(this.firestore, 'docs', docDaEliminare.id)))
+                .pipe(
+                )
+                .subscribe(documentoDaEliminare => {
+                    console.log('@@@', 'Test001Component', 'eliminaDocsSelezionati', 'eliminato il record', documentoDaEliminare);
+                });
+        }
+    }
+
+    masterToggle() {
+        // console.log('@@@', 'Test001Component', 'masterToggle');
+        if (this.isAllSelected()) {
+            this.selection.clear();
+            return;
+        }
+        this.selection.select(...this.dataSource.data);
     }
 
     isAllSelected() {
+        // console.log('@@@', 'Test001Component', 'isAllSelected');
         if (this.dataSource == null) {
             return false;
         }
         const numSelected = this.selection.selected.length;
-        const numRows = this.dataSource.
+        const numRows = this.dataSource.data.length;
         return numSelected === numRows;
+    }
+
+    checkboxLabel(row?: Doc): string {
+        // console.log('@@@', 'Test001Component', 'checkboxLabel');
+        if (!row) {
+            return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+        }
+        return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.code}`;
+    }
+
+    clickSuUnDoc(event: any, documentoCliccato: Doc) {
+        console.log('@@@', 'Test001Component', 'clickSuUnDoc', event, documentoCliccato);
     }
 
 }
