@@ -1,10 +1,12 @@
-import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, Input } from '@angular/core';
 
 import { catchError, EMPTY, from, Observable, share, shareReplay, Subscription, take, tap } from 'rxjs';
 
 import { SelectionModel } from '@angular/cdk/collections';
 
 import { MatSort, Sort } from '@angular/material/sort';
+import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { MatMenu, MatMenuItem } from '@angular/material/menu/';
 
 import {
     addDoc,
@@ -22,12 +24,11 @@ import {
     OrderByDirection
 } from '@angular/fire/firestore';
 
-import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
-
 import { DocsDataSource } from '../app.datasource';
 import { CreateNewDocDialogComponent } from '../create-new-doc-dialog/create-new-doc-dialog.component';
 import { Doc } from '../doc';
 import docConverter from '../doc.converter'
+import { Mio_Options } from '../options';
 
 @Component({
     selector: 'app-test001',
@@ -36,11 +37,13 @@ import docConverter from '../doc.converter'
 })
 export class Test001Component implements OnInit, AfterViewInit {
 
+    @Input() mio_options: Mio_Options | null;
+
     @ViewChild(MatSort) sort!: MatSort;
 
     displayedColumns: string[] = ['select', 'code', 'description', 'category'];
     dataSource: DocsDataSource = new DocsDataSource(this.firestore);
-    selection = new SelectionModel<Doc>(true, [], true);
+    selection = new SelectionModel<Doc>(true, [], true);    
 
     constructor(private firestore: Firestore,
         private dialog: MatDialog) {
@@ -48,6 +51,12 @@ export class Test001Component implements OnInit, AfterViewInit {
         this.selection.changed.asObservable().subscribe(selectionChanged => {
             console.log('@@@', 'Test001Component', 'constructor', 'selectionChanged subscribe', selectionChanged);
         });
+
+        // test: MatMenu;
+        // let aaa = new MatMenuItem(null);
+        // this.test = new MatMenu();
+        // this.test.addItem
+
     }
 
     ngOnInit(): void {

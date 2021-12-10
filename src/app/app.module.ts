@@ -12,6 +12,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSortModule } from '@angular/material/sort';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { connectFirestoreEmulator, getFirestore, provideFirestore, enableMultiTabIndexedDbPersistence } from '@angular/fire/firestore';
@@ -58,7 +59,8 @@ export const persistenceEnabled = new Promise<boolean>(resolve => {
         MatToolbarModule,
         MatIconModule,
         MatCheckboxModule,
-        MatSortModule
+        MatSortModule,
+        MatMenuModule
     ],
     providers: [],
     bootstrap: [AppComponent]

@@ -1,1 +1,7 @@
-<app-test001></app-test001>
+<ng-template #loading>
+    <div>Loading...</div>
+</ng-template>
+<ng-template #docs>
+    <app-test001 [mio_options]="this.mio_options"></app-test001>
+</ng-template>
+<ng-container *ngTemplateOutlet="(this.loading$ | async) ? loading : docs"></ng-container>
