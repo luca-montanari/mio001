@@ -32,7 +32,7 @@ export class AppComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         console.log('@@@', 'AppComponent', 'ngOnInit');
         this.loadingSubject.next(true);
-        const ref: DocumentReference<Mio_Options> = doc(this.firestore, 'options', 'THJbqh4UkAUplyb2VsND').withConverter(optionsConverter);
+        const ref: DocumentReference<Mio_Options> = doc(this.firestore, 'options', 'vEY9HAN2Ul67rFtnVx6T').withConverter(optionsConverter);
         // const docData = fromRef(ref);
         // getDoc(ref).then(aaa => {
         //     const aaa11 = aaa.data();

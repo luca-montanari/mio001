@@ -3,6 +3,7 @@ import { Component, OnInit, AfterViewInit, ViewChild, Input } from '@angular/cor
 import { catchError, EMPTY, from, Observable, share, shareReplay, Subscription, take, tap } from 'rxjs';
 
 import { SelectionModel } from '@angular/cdk/collections';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
@@ -28,7 +29,7 @@ import { DocsDataSource } from '../app.datasource';
 import { CreateNewDocDialogComponent } from '../create-new-doc-dialog/create-new-doc-dialog.component';
 import { Doc } from '../doc';
 import docConverter from '../doc.converter'
-import { Mio_Options } from '../options';
+import { Mio_Options, Mio_Column } from '../options';
 
 @Component({
     selector: 'app-test001',
@@ -37,30 +38,32 @@ import { Mio_Options } from '../options';
 })
 export class Test001Component implements OnInit, AfterViewInit {
 
-    @Input() mio_options: Mio_Options | null;
+    @Input() mio_options!: Mio_Options | null;
 
     @ViewChild(MatSort) sort!: MatSort;
 
-    displayedColumns: string[] = ['select', 'code', 'description', 'category'];
+    // displayedColumns: string[] = ['select', 'code', 'description', 'category'];
+    displayedColumns: string[] | null;
+    
     dataSource: DocsDataSource = new DocsDataSource(this.firestore);
     selection = new SelectionModel<Doc>(true, [], true);    
 
     constructor(private firestore: Firestore,
-        private dialog: MatDialog) {
-        console.log('@@@', 'Test001Component', 'constructor');        
+                private dialog: MatDialog) {
+        console.log('@@@', 'Test001Component', 'constructor', this.mio_options);        
         this.selection.changed.asObservable().subscribe(selectionChanged => {
             console.log('@@@', 'Test001Component', 'constructor', 'selectionChanged subscribe', selectionChanged);
         });
-
-        // test: MatMenu;
-        // let aaa = new MatMenuItem(null);
-        // this.test = new MatMenu();
-        // this.test.addItem
-
+        // this.displayedColumns = this.mio_options!.columns.map(c => c);
+        this.displayedColumns = null;
     }
 
     ngOnInit(): void {
-        console.log('@@@', 'Test001Component', 'ngOnInit');
+        console.log('@@@', 'Test001Component', 'ngOnInit', this.mio_options, this.mio_options!.columns.map(c => c));
+        this.displayedColumns = this.mio_options!.columns.map(c => c.id);
+        this.displayedColumns.splice(0, 0, 'select');
+        this.displayedColumns.push('eliminaDocumento');
+        // this.displayedColumns.push('');
         // this.dataSource = new DocsDataSource(this.firestore);
         this.dataSource.loadDocs('code', 'asc');
     }
@@ -114,18 +117,19 @@ export class Test001Component implements OnInit, AfterViewInit {
 
     eliminaDocsSelezionati() {
         console.log('@@@', 'Test001Component', 'eliminaDocsSelezionati', this.selection);
-        if (!this.selection.hasValue) {
+        if (!this.selection.hasValue || !this.selection.selected || this.selection.select.length <= 0) {
             console.log('@@@', 'Test001Component', 'eliminaDocsSelezionati', 'nessun elemento selezionato');
             return;
         }
         for (let docDaEliminare of this.selection.selected) {
-            console.log('@@@', 'Test001Component', 'eliminaDocsSelezionati', 'eliminazione del record', docDaEliminare);
-            from(deleteDoc(doc(this.firestore, 'docs', docDaEliminare.id)))
-                .pipe(
-                )
-                .subscribe(documentoDaEliminare => {
-                    console.log('@@@', 'Test001Component', 'eliminaDocsSelezionati', 'eliminato il record', documentoDaEliminare);
-                });
+            // console.log('@@@', 'Test001Component', 'eliminaDocsSelezionati', 'eliminazione del record', docDaEliminare);
+            // from(deleteDoc(doc(this.firestore, 'docs', docDaEliminare.id)))
+            //     .pipe(
+            //     )
+            //     .subscribe(documentoDaEliminare => {
+            //         console.log('@@@', 'Test001Component', 'eliminaDocsSelezionati', 'eliminato il record', documentoDaEliminare);
+            //     });
+            this.eliminaDocPassatoInInput(docDaEliminare);
         }
     }
 
@@ -158,6 +162,35 @@ export class Test001Component implements OnInit, AfterViewInit {
 
     clickSuUnDoc(event: any, documentoCliccato: Doc) {
         console.log('@@@', 'Test001Component', 'clickSuUnDoc', event, documentoCliccato);
+    }
+
+    getValue(doc: Doc, fieldName: string): string {
+        // console.log('@@@', 'Test001Component', 'getValue', doc, fieldName);
+        let value: string = doc[fieldName as keyof typeof doc];
+        return value;
+    }
+
+    drop(event: CdkDragDrop<string[]>) {
+        console.log('@@@', 'Test001Component', 'drop', event);
+        const columnsReorder: Mio_Column[] = [ ...this.mio_options!.columns ];        
+        moveItemInArray(columnsReorder, event.previousIndex - 1, event.currentIndex - 1);
+        this.mio_options!.columns = [ ...columnsReorder ];
+        this.displayedColumns = this.mio_options!.columns.map(c => c.id);
+        this.displayedColumns.splice(0, 0, 'select');
+        this.displayedColumns.push('eliminaDocumento');        
+    }
+
+    eliminaDocumento(event: any, doc: Doc) {
+        console.log('@@@', 'Test001Component', 'eliminaDocumento', event, doc);
+        this.eliminaDocPassatoInInput(doc);
+    }
+
+    eliminaDocPassatoInInput(docDaEliminare: Doc) {
+        console.log('@@@', 'Test001Component', 'eliminaDocPassatoInInput', 'eliminazione del record', docDaEliminare);
+        from(deleteDoc(doc(this.firestore, 'docs', docDaEliminare.id)))
+            .subscribe(documentoDaEliminare => {
+                console.log('@@@', 'Test001Component', 'eliminaDocPassatoInInput', 'eliminato il record', documentoDaEliminare);
+            });
     }
 
 }

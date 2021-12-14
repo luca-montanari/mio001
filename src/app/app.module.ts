@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -51,6 +52,7 @@ export const persistenceEnabled = new Promise<boolean>(resolve => {
             return firestore;
         }),
         BrowserAnimationsModule,
+        DragDropModule,
         MatTableModule,
         MatButtonModule,
         MatDialogModule,

@@ -32,12 +32,60 @@
 </button> -->
 
 <!-- <div *ngIf="dataSource"> -->
-<table mat-table [dataSource]="dataSource" matSort matSortActive="code" matSortDirection="asc" matSortDisableClear
+<table 
+    mat-table 
+    [dataSource]="dataSource" 
+    cdkDropList
+    cdkDropListOrientation="horizontal"
+    (cdkDropListDropped)="drop($event)"
+    matSort matSortActive="code" 
+    matSortDirection="asc" 
+    matSortDisableClear
     class="mat-elevation-z8 demo-table">
 
     <!-- Selection -->
-    <ng-container matColumnDef="select">
+    <!-- <ng-container matColumnDef="select">
         <th mat-header-cell *matHeaderCellDef>
+            <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
+                [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()">
+            </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let row">
+            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+                [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)">
+            </mat-checkbox>
+        </td>
+    </ng-container> -->
+
+    <!-- Code -->
+    <!-- <ng-container matColumnDef="code">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Codice
+        </th>
+        <td mat-cell *matCellDef="let element">{{element.code}}</td>
+        <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container> -->
+
+    <!-- Description -->
+    <!-- <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Descrizione
+        </th>
+        <td mat-cell *matCellDef="let element">{{element.description}}</td>
+        <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container> -->
+
+    <!-- Category -->
+    <!-- <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Categoria
+        </th>
+        <td mat-cell *matCellDef="let element">{{element.category}}</td>
+        <td mat-footer-cell *matFooterCellDef></td>
+    </ng-container> -->
+
+    <ng-container matColumnDef="select">
+        <th mat-header-cell cdkDrag *matHeaderCellDef>
             <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selection.hasValue() && isAllSelected()"
                 [indeterminate]="selection.hasValue() && !isAllSelected()" [aria-label]="checkboxLabel()">
             </mat-checkbox>
@@ -49,31 +97,37 @@
         </td>
     </ng-container>
 
-    <!-- Code -->
-    <ng-container matColumnDef="code">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            Codice
+    <ng-container *ngFor="let column of mio_options!.columns" [matColumnDef]="column.id">
+        <th 
+            mat-header-cell 
+            cdkDrag
+            *matHeaderCellDef 
+            mat-sort-header>
+            {{column.title}}
         </th>
-        <td mat-cell *matCellDef="let element">{{element.code}}</td>
-        <!-- <td mat-footer-cell *matFooterCellDef></td> -->
+        <td 
+            mat-cell 
+            *matCellDef="let element">
+            {{getValue(element, column.id)}}
+        </td>
     </ng-container>
 
-    <!-- Description -->
-    <ng-container matColumnDef="description">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            Descrizione
-        </th>
-        <td mat-cell *matCellDef="let element">{{element.description}}</td>
-        <!-- <td mat-footer-cell *matFooterCellDef></td> -->
-    </ng-container>
-
-    <!-- Category -->
-    <ng-container matColumnDef="category">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            Categoria
-        </th>
-        <td mat-cell *matCellDef="let element">{{element.category}}</td>
-        <!-- <td mat-footer-cell *matFooterCellDef></td> -->
+    <ng-container matColumnDef="eliminaDocumento">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td 
+            mat-cell 
+            *matCellDef="let element" 
+            style="width: 20%">
+            <button 
+                mat-icon-button 
+                color="primary" 
+                (click)="eliminaDocumento($event, element)" 
+                title="View Contact">
+                <mat-icon>
+                    delete
+                </mat-icon>
+            </button>
+        </td>
     </ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
