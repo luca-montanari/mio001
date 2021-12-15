@@ -9,7 +9,10 @@ import {
     Firestore, 
     orderBy, 
     query,
-    OrderByDirection
+    OrderByDirection,
+    startAt,
+    endAt,
+    limit
 } from '@angular/fire/firestore';
 
 import { Doc } from './doc';
@@ -42,10 +45,25 @@ export class DocsDataSource extends DataSource<Doc> {
         this.dataStream.complete();
     }
 
-    loadDocs(campoDiOrdinamento: string, direzioneOrdinamento: OrderByDirection) {
-        console.log('@@@', 'DocsDataSource', 'loadDocs', campoDiOrdinamento, direzioneOrdinamento);
+    // loadDocs(campoDiOrdinamento: string, direzioneOrdinamento: OrderByDirection) {
+    //     console.log('@@@', 'DocsDataSource', 'loadDocs', campoDiOrdinamento, direzioneOrdinamento);
+    //     const collectionDocs = collection(this.firestore, 'docs').withConverter(docConverter);
+    //     const queryOrderBy = query<Doc>(collectionDocs, orderBy(campoDiOrdinamento, direzioneOrdinamento));
+    //     collectionData<Doc>(queryOrderBy)
+    //         .subscribe(
+    //             records => {
+    //                 console.log('@@@', 'DocsDataSource', 'loadDocs', 'subscribe', records);
+    //                 this.dataStream.next(records);
+    //             }
+    //         )
+    // }
+
+    loadDocs(campoDiOrdinamento: string, direzioneOrdinamento: OrderByDirection, indicePagina: number, numeroDocsInPagina: number) {
+        console.log('@@@', 'DocsDataSource', 'loadDocs', campoDiOrdinamento, direzioneOrdinamento, indicePagina, numeroDocsInPagina);
         const collectionDocs = collection(this.firestore, 'docs').withConverter(docConverter);
-        const queryOrderBy = query<Doc>(collectionDocs, orderBy(campoDiOrdinamento, direzioneOrdinamento));
+        const inizio: number = numeroDocsInPagina * indicePagina;
+        // const fine: number = inizio + numeroDocsInPagina;
+        const queryOrderBy = query<Doc>(collectionDocs, orderBy(campoDiOrdinamento, direzioneOrdinamento), startAt(inizio), limit(numeroDocsInPagina));
         collectionData<Doc>(queryOrderBy)
             .subscribe(
                 records => {

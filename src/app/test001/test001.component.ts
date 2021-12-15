@@ -6,7 +6,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 import { MatSort, Sort } from '@angular/material/sort';
-import { MatDialog, MatDialogConfig, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig, MatDialogRef, throwMatDialogContentAlreadyAttachedError } from '@angular/material/dialog';
 import { MatMenu, MatMenuItem } from '@angular/material/menu/';
 
 import {
@@ -22,7 +22,9 @@ import {
     deleteDoc,
     doc,
     fromRef,
-    OrderByDirection
+    OrderByDirection,
+    updateDoc,
+    limit
 } from '@angular/fire/firestore';
 
 import { DocsDataSource } from '../app.datasource';
@@ -30,6 +32,8 @@ import { CreateNewDocDialogComponent } from '../create-new-doc-dialog/create-new
 import { Doc } from '../doc';
 import docConverter from '../doc.converter'
 import { Mio_Options, Mio_Column } from '../options';
+import { UpdateDocDialogComponent } from '../update-doc-dialog/update-doc-dialog.component';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
     selector: 'app-test001',
@@ -41,6 +45,7 @@ export class Test001Component implements OnInit, AfterViewInit {
     @Input() mio_options!: Mio_Options | null;
 
     @ViewChild(MatSort) sort!: MatSort;
+    @ViewChild(MatPaginator) paginator: MatPaginator;
 
     // displayedColumns: string[] = ['select', 'code', 'description', 'category'];
     displayedColumns: string[] | null;
@@ -55,7 +60,7 @@ export class Test001Component implements OnInit, AfterViewInit {
             console.log('@@@', 'Test001Component', 'constructor', 'selectionChanged subscribe', selectionChanged);
         });
         // this.displayedColumns = this.mio_options!.columns.map(c => c);
-        this.displayedColumns = null;
+        this.displayedColumns = null;        
     }
 
     ngOnInit(): void {
@@ -63,6 +68,7 @@ export class Test001Component implements OnInit, AfterViewInit {
         this.displayedColumns = this.mio_options!.columns.map(c => c.id);
         this.displayedColumns.splice(0, 0, 'select');
         this.displayedColumns.push('eliminaDocumento');
+        this.displayedColumns.push('aggiornaDocumento');
         // this.displayedColumns.push('');
         // this.dataSource = new DocsDataSource(this.firestore);
         this.dataSource.loadDocs('code', 'asc');
@@ -75,6 +81,7 @@ export class Test001Component implements OnInit, AfterViewInit {
             console.log('@@@', 'Test001Component', 'ngAfterViewInit', 'sortChange', 'subscribe', this.sort, this.sort.active, this.sort.direction);            
             this.dataSource.loadDocs(this.sort.active, this.sort.direction === 'asc' ? 'asc' : 'desc');
         });
+        this.dataSource.paginator = this.paginator;
     }
 
     ngOnDestroy(): void {
@@ -177,7 +184,8 @@ export class Test001Component implements OnInit, AfterViewInit {
         this.mio_options!.columns = [ ...columnsReorder ];
         this.displayedColumns = this.mio_options!.columns.map(c => c.id);
         this.displayedColumns.splice(0, 0, 'select');
-        this.displayedColumns.push('eliminaDocumento');        
+        this.displayedColumns.push('eliminaDocumento');
+        this.displayedColumns.push('aggiornaDocumento');
     }
 
     eliminaDocumento(event: any, doc: Doc) {
@@ -191,6 +199,66 @@ export class Test001Component implements OnInit, AfterViewInit {
             .subscribe(documentoDaEliminare => {
                 console.log('@@@', 'Test001Component', 'eliminaDocPassatoInInput', 'eliminato il record', documentoDaEliminare);
             });
+    }
+
+    aggiornaDocumento(event: any, doc: Doc) {
+        console.log('@@@', 'Test001Component', 'aggiornaDocumento', event, doc);        
+        this.aggiornaDocPassatoInInput(doc);
+    }
+
+    aggiornaDocPassatoInInput(docDaAggiornare: Doc) {
+        console.log('@@@', 'Test001Component', 'aggiornaDocPassatoInInput', docDaAggiornare);
+        const dialogConfig = new MatDialogConfig<Partial<Doc>>();
+        dialogConfig.disableClose = true;
+        dialogConfig.autoFocus = true;
+        dialogConfig.minWidth = "400px";
+        dialogConfig.data = docDaAggiornare;
+        dialogConfig.closeOnNavigation = false;
+        const matDialogRef: MatDialogRef<UpdateDocDialogComponent, Partial<Doc>> = this.dialog.open<UpdateDocDialogComponent>(UpdateDocDialogComponent, dialogConfig);
+        matDialogRef
+            .afterClosed()
+            .subscribe(newPartialdoc => {
+                console.log('@@@', 'Test001Component', 'aggiornaDocPassatoInInput', 'subscribe', newPartialdoc);
+                if (newPartialdoc) {
+                    const ref: DocumentReference<Doc> = doc(this.firestore, 'docs', docDaAggiornare.id).withConverter(docConverter);
+                    from(updateDoc(ref, newPartialdoc))
+                        .pipe(
+                            catchError(err => {
+                                console.log('@@@', 'errore', err)
+                                return EMPTY;
+                            })
+                        )
+                        .subscribe(aaa => {
+                            console.log('@@@', 'Test001Component', 'aggiornaDocPassatoInInput', 'documento aggiornato', aaa);
+                        });
+                    // updateDoc(ref, newPartialdoc).then(ddd => {
+                    //     console.log('sssssssss', ddd);
+                    // });
+                }
+            });
+        // matDialogRef
+        //     .afterClosed()
+        //     .subscribe(newPartialdoc => {
+        //         console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'subscribe', newPartialdoc);
+        //         if (newPartialdoc) {
+        //             const collectionDocs = collection(this.firestore, 'docs').withConverter(docConverter);
+        //             from(addDoc<Partial<Doc>>(collectionDocs, { ...newPartialdoc }))
+        //                 .pipe(
+        //                     tap(
+        //                         value => console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'prima di creare un documento', value)
+        //                     ),
+        //                     catchError(err => {
+        //                         console.log('@@@', 'errore', err)
+        //                         return EMPTY;
+        //                     })
+        //                 )
+        //                 .subscribe(
+        //                     documentReference => {
+        //                         console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'documento creato', documentReference);
+        //                     }
+        //                 );
+        //         }
+        //     });
     }
 
 }

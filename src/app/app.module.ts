@@ -14,6 +14,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSortModule } from '@angular/material/sort';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule } from '@angular/material/paginator';
 
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { connectFirestoreEmulator, getFirestore, provideFirestore, enableMultiTabIndexedDbPersistence } from '@angular/fire/firestore';
@@ -24,6 +26,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CreateNewDocDialogComponent } from './create-new-doc-dialog/create-new-doc-dialog.component';
 import { Test001Component } from './test001/test001.component';
+import { UpdateDocDialogComponent } from './update-doc-dialog/update-doc-dialog.component';
 
 let resolvePersistenceEnabled: (enabled: boolean) => void;
 export const persistenceEnabled = new Promise<boolean>(resolve => {
@@ -33,7 +36,8 @@ export const persistenceEnabled = new Promise<boolean>(resolve => {
     declarations: [
         AppComponent,
         CreateNewDocDialogComponent,
-        Test001Component
+        Test001Component,
+        UpdateDocDialogComponent
     ],
     imports: [
         BrowserModule,
@@ -62,7 +66,9 @@ export const persistenceEnabled = new Promise<boolean>(resolve => {
         MatIconModule,
         MatCheckboxModule,
         MatSortModule,
-        MatMenuModule
+        MatMenuModule,
+        MatTooltipModule,
+        MatPaginatorModule
     ],
     providers: [],
     bootstrap: [AppComponent]
