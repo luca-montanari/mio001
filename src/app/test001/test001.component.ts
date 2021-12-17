@@ -33,7 +33,7 @@ import { Doc } from '../doc';
 import docConverter from '../doc.converter'
 import { Mio_Options, Mio_Column } from '../options';
 import { UpdateDocDialogComponent } from '../update-doc-dialog/update-doc-dialog.component';
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
 @Component({
     selector: 'app-test001',
@@ -45,13 +45,16 @@ export class Test001Component implements OnInit, AfterViewInit {
     @Input() mio_options!: Mio_Options | null;
 
     @ViewChild(MatSort) sort!: MatSort;
-    @ViewChild(MatPaginator) paginator: MatPaginator;
+    @ViewChild(MatPaginator) paginator!: MatPaginator;
 
     // displayedColumns: string[] = ['select', 'code', 'description', 'category'];
     displayedColumns: string[] | null;
     
     dataSource: DocsDataSource = new DocsDataSource(this.firestore);
     selection = new SelectionModel<Doc>(true, [], true);    
+
+    indicePaginaCorrente: number = -1;
+    primoCodice: string | null = null;
 
     constructor(private firestore: Firestore,
                 private dialog: MatDialog) {
@@ -60,7 +63,7 @@ export class Test001Component implements OnInit, AfterViewInit {
             console.log('@@@', 'Test001Component', 'constructor', 'selectionChanged subscribe', selectionChanged);
         });
         // this.displayedColumns = this.mio_options!.columns.map(c => c);
-        this.displayedColumns = null;        
+        this.displayedColumns = null;
     }
 
     ngOnInit(): void {
@@ -71,7 +74,8 @@ export class Test001Component implements OnInit, AfterViewInit {
         this.displayedColumns.push('aggiornaDocumento');
         // this.displayedColumns.push('');
         // this.dataSource = new DocsDataSource(this.firestore);
-        this.dataSource.loadDocs('code', 'asc');
+        this.dataSource.caricaPaginaDiDocumenti('code', 'asc', this.indicePaginaCorrente, 0, 3, true);
+        this.indicePaginaCorrente = 0;
     }
 
     ngAfterViewInit() {
@@ -79,9 +83,15 @@ export class Test001Component implements OnInit, AfterViewInit {
         // this.dataSource.sort = this.sort;
         this.sort.sortChange.subscribe(() => {
             console.log('@@@', 'Test001Component', 'ngAfterViewInit', 'sortChange', 'subscribe', this.sort, this.sort.active, this.sort.direction);            
-            this.dataSource.loadDocs(this.sort.active, this.sort.direction === 'asc' ? 'asc' : 'desc');
+            this.dataSource.caricaPaginaDiDocumenti(this.sort.active, this.sort.direction === 'asc' ? 'asc' : 'desc', this.paginator.pageIndex, this.paginator.pageIndex, 3, this.paginator.hasNextPage());
         });
-        this.dataSource.paginator = this.paginator;
+        // this.dataSource.paginator = this.paginator;        
+        this.paginator.page
+            .subscribe(pageEvent => {
+                console.log('@@@', 'Test001Component', 'ngAfterViewInit', 'paginator', 'subscribe', pageEvent, this.paginator.pageIndex, this.paginator.pageSize);
+                this.dataSource.caricaPaginaDiDocumenti(this.sort.active, this.sort.direction === 'asc' ? 'asc' : 'desc', this.indicePaginaCorrente, this.paginator.pageIndex, this.paginator.pageSize, this.paginator.hasNextPage());
+                this.indicePaginaCorrente = this.paginator.pageIndex;
+            });
     }
 
     ngOnDestroy(): void {

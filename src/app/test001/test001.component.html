@@ -160,11 +160,13 @@
     <tr mat-row (click)="clickSuUnDoc($event, row)" *matRowDef="let row; columns: displayedColumns;"></tr>
     <!-- <tr mat-footer-row *matFooterRowDef="displayedColumns"></tr> -->
 
-    <mat-paginator 
-        [length]="dataSource.data.length" 
-        [pageSize]="3" 
-        [pageSizeOptions]="[3, 5, 10]">
-    </mat-paginator>
-
 </table>
+
+<mat-paginator 
+    showFirstLastButtons
+    [length]="9" 
+    [pageSize]="3" 
+    [pageSizeOptions]="[3, 5, 10]">
+</mat-paginator>
+
 <!-- </div> -->
