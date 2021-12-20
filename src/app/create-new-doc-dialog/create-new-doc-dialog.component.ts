@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
-import { Doc } from '../doc';
+import { Doc } from '../models/doc';
 
 @Component({
     selector: 'app-create-new-doc-dialog',

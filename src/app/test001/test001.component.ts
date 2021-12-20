@@ -8,6 +8,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatDialog, MatDialogConfig, MatDialogRef, throwMatDialogContentAlreadyAttachedError } from '@angular/material/dialog';
 import { MatMenu, MatMenuItem } from '@angular/material/menu/';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 
 import {
     addDoc,
@@ -27,13 +28,13 @@ import {
     limit
 } from '@angular/fire/firestore';
 
-import { DocsDataSource } from '../app.datasource';
+import { DocsDataSource } from '../services/docs.datasource';
 import { CreateNewDocDialogComponent } from '../create-new-doc-dialog/create-new-doc-dialog.component';
-import { Doc } from '../doc';
-import docConverter from '../doc.converter'
-import { Mio_Options, Mio_Column } from '../options';
+import { Doc } from '../models/doc';
+import docConverter from '../models/doc.converter'
+import { Mio_Options, Mio_Column } from '../models/options';
 import { UpdateDocDialogComponent } from '../update-doc-dialog/update-doc-dialog.component';
-import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { DocsService } from '../services/docs.service';
 
 @Component({
     selector: 'app-test001',
@@ -46,23 +47,20 @@ export class Test001Component implements OnInit, AfterViewInit {
 
     @ViewChild(MatSort) sort!: MatSort;
     @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-    // displayedColumns: string[] = ['select', 'code', 'description', 'category'];
-    displayedColumns: string[] | null;
     
+    displayedColumns: string[] | null;    
     dataSource: DocsDataSource = new DocsDataSource(this.firestore);
     selection = new SelectionModel<Doc>(true, [], true);    
-
     indicePaginaCorrente: number = -1;
     primoCodice: string | null = null;
 
     constructor(private firestore: Firestore,
-                private dialog: MatDialog) {
+                private dialog: MatDialog,
+                private docsService: DocsService ) {
         console.log('@@@', 'Test001Component', 'constructor', this.mio_options);        
         this.selection.changed.asObservable().subscribe(selectionChanged => {
             console.log('@@@', 'Test001Component', 'constructor', 'selectionChanged subscribe', selectionChanged);
         });
-        // this.displayedColumns = this.mio_options!.columns.map(c => c);
         this.displayedColumns = null;
     }
 
@@ -72,8 +70,6 @@ export class Test001Component implements OnInit, AfterViewInit {
         this.displayedColumns.splice(0, 0, 'select');
         this.displayedColumns.push('eliminaDocumento');
         this.displayedColumns.push('aggiornaDocumento');
-        // this.displayedColumns.push('');
-        // this.dataSource = new DocsDataSource(this.firestore);
         this.dataSource.caricaPaginaDiDocumenti('code', 'asc', this.indicePaginaCorrente, 0, 3, true);
         this.indicePaginaCorrente = 0;
     }
@@ -109,11 +105,10 @@ export class Test001Component implements OnInit, AfterViewInit {
         const matDialogRef: MatDialogRef<CreateNewDocDialogComponent, Partial<Doc>> = this.dialog.open<CreateNewDocDialogComponent>(CreateNewDocDialogComponent, dialogConfig);
         matDialogRef
             .afterClosed()
-            .subscribe(newPartialdoc => {
-                console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'subscribe', newPartialdoc);
-                if (newPartialdoc) {
-                    const collectionDocs = collection(this.firestore, 'docs').withConverter(docConverter);
-                    from(addDoc<Partial<Doc>>(collectionDocs, { ...newPartialdoc }))
+            .subscribe(datiDelNuovoDocumento => {
+                console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'subscribe', datiDelNuovoDocumento);
+                if (datiDelNuovoDocumento) {
+                    this.docsService.creaDocumento(datiDelNuovoDocumento)
                         .pipe(
                             tap(
                                 value => console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'prima di creare un documento', value)
@@ -139,13 +134,6 @@ export class Test001Component implements OnInit, AfterViewInit {
             return;
         }
         for (let docDaEliminare of this.selection.selected) {
-            // console.log('@@@', 'Test001Component', 'eliminaDocsSelezionati', 'eliminazione del record', docDaEliminare);
-            // from(deleteDoc(doc(this.firestore, 'docs', docDaEliminare.id)))
-            //     .pipe(
-            //     )
-            //     .subscribe(documentoDaEliminare => {
-            //         console.log('@@@', 'Test001Component', 'eliminaDocsSelezionati', 'eliminato il record', documentoDaEliminare);
-            //     });
             this.eliminaDocPassatoInInput(docDaEliminare);
         }
     }
@@ -198,77 +186,50 @@ export class Test001Component implements OnInit, AfterViewInit {
         this.displayedColumns.push('aggiornaDocumento');
     }
 
-    eliminaDocumento(event: any, doc: Doc) {
+    eliminaDocumentoCorrente(event: any, doc: Doc) {
         console.log('@@@', 'Test001Component', 'eliminaDocumento', event, doc);
         this.eliminaDocPassatoInInput(doc);
     }
 
     eliminaDocPassatoInInput(docDaEliminare: Doc) {
         console.log('@@@', 'Test001Component', 'eliminaDocPassatoInInput', 'eliminazione del record', docDaEliminare);
-        from(deleteDoc(doc(this.firestore, 'docs', docDaEliminare.id)))
-            .subscribe(documentoDaEliminare => {
-                console.log('@@@', 'Test001Component', 'eliminaDocPassatoInInput', 'eliminato il record', documentoDaEliminare);
+        this.docsService.eliminaDocumento(docDaEliminare.id)
+            .subscribe(nessunValoreDiRitorno => {
+                console.log('@@@', 'Test001Component', 'eliminaDocPassatoInInput', 'eliminato il record', nessunValoreDiRitorno);
             });
     }
 
-    aggiornaDocumento(event: any, doc: Doc) {
-        console.log('@@@', 'Test001Component', 'aggiornaDocumento', event, doc);        
+    aggiornaDocumentoCorrente(event: any, doc: Doc) {
+        console.log('@@@', 'Test001Component', 'aggiornaDocumentoCorrente', event, doc);        
         this.aggiornaDocPassatoInInput(doc);
     }
 
-    aggiornaDocPassatoInInput(docDaAggiornare: Doc) {
-        console.log('@@@', 'Test001Component', 'aggiornaDocPassatoInInput', docDaAggiornare);
+    aggiornaDocPassatoInInput(documentoDaAggiornare: Doc) {
+        console.log('@@@', 'Test001Component', 'aggiornaDocPassatoInInput', documentoDaAggiornare);
         const dialogConfig = new MatDialogConfig<Partial<Doc>>();
         dialogConfig.disableClose = true;
         dialogConfig.autoFocus = true;
         dialogConfig.minWidth = "400px";
-        dialogConfig.data = docDaAggiornare;
+        dialogConfig.data = documentoDaAggiornare;
         dialogConfig.closeOnNavigation = false;
         const matDialogRef: MatDialogRef<UpdateDocDialogComponent, Partial<Doc>> = this.dialog.open<UpdateDocDialogComponent>(UpdateDocDialogComponent, dialogConfig);
         matDialogRef
             .afterClosed()
-            .subscribe(newPartialdoc => {
-                console.log('@@@', 'Test001Component', 'aggiornaDocPassatoInInput', 'subscribe', newPartialdoc);
-                if (newPartialdoc) {
-                    const ref: DocumentReference<Doc> = doc(this.firestore, 'docs', docDaAggiornare.id).withConverter(docConverter);
-                    from(updateDoc(ref, newPartialdoc))
+            .subscribe(modificheDaAggiornare => {
+                console.log('@@@', 'Test001Component', 'aggiornaDocPassatoInInput', 'subscribe', modificheDaAggiornare);
+                if (modificheDaAggiornare) {
+                    this.docsService.aggiornaDocumento(documentoDaAggiornare.id, modificheDaAggiornare)
                         .pipe(
                             catchError(err => {
                                 console.log('@@@', 'errore', err)
                                 return EMPTY;
                             })
                         )
-                        .subscribe(aaa => {
-                            console.log('@@@', 'Test001Component', 'aggiornaDocPassatoInInput', 'documento aggiornato', aaa);
+                        .subscribe(nessunValoreDiRitorno => {
+                            console.log('@@@', 'Test001Component', 'aggiornaDocPassatoInInput', 'documento aggiornato', nessunValoreDiRitorno);
                         });
-                    // updateDoc(ref, newPartialdoc).then(ddd => {
-                    //     console.log('sssssssss', ddd);
-                    // });
-                }
+                }                
             });
-        // matDialogRef
-        //     .afterClosed()
-        //     .subscribe(newPartialdoc => {
-        //         console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'subscribe', newPartialdoc);
-        //         if (newPartialdoc) {
-        //             const collectionDocs = collection(this.firestore, 'docs').withConverter(docConverter);
-        //             from(addDoc<Partial<Doc>>(collectionDocs, { ...newPartialdoc }))
-        //                 .pipe(
-        //                     tap(
-        //                         value => console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'prima di creare un documento', value)
-        //                     ),
-        //                     catchError(err => {
-        //                         console.log('@@@', 'errore', err)
-        //                         return EMPTY;
-        //                     })
-        //                 )
-        //                 .subscribe(
-        //                     documentReference => {
-        //                         console.log('@@@', 'Test001Component', 'CreaNuovoDoc', 'documento creato', documentReference);
-        //                     }
-        //                 );
-        //         }
-        //     });
     }
 
 }
