@@ -32,7 +32,7 @@ import { DocsDataSource } from '../services/docs.datasource';
 import { CreateNewDocDialogComponent } from '../create-new-doc-dialog/create-new-doc-dialog.component';
 import { Doc } from '../models/doc';
 import docConverter from '../models/doc.converter'
-import { Mio_Options, Mio_Column } from '../models/options';
+import { Mio_Options, Mio_Column } from '../models/opzioni';
 import { UpdateDocDialogComponent } from '../update-doc-dialog/update-doc-dialog.component';
 import { DocsService } from '../services/docs.service';
 
@@ -73,6 +73,7 @@ export class Test001Component implements OnInit, AfterViewInit {
         this.dataSource.caricaPaginaDiDocumenti('code', 'asc', this.indicePaginaCorrente, 0, 3, true);
         this.indicePaginaCorrente = 0;
     }
+    
 
     ngAfterViewInit() {
         console.log('@@@', 'Test001Component', 'ngAfterViewInit', this.sort.active, this.sort.direction);

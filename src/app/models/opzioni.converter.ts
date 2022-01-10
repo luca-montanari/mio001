@@ -4,7 +4,7 @@ import {
     DocumentData,
 } from '@angular/fire/firestore';
 
-import { Mio_Options, Mio_Column } from './options';
+import { Mio_Options, Mio_Column } from './opzioni';
 
 export default {
     toFirestore(mio_options: Mio_Options): DocumentData {                

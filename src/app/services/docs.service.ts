@@ -13,15 +13,13 @@ import {
     collection
 } from '@angular/fire/firestore';
 
-import { Doc } from '../models/doc';
+import { Doc, NOME_DELLA_COLLEZIONE_DOCS } from '../models/doc';
 import docConverter from '../models/doc.converter';
 
 @Injectable({
     providedIn: 'root'
 })
-export class DocsService {
-
-    static NOME_DELLA_COLLEZIONE = 'docs';
+export class DocsService {    
 
     constructor(private firestore: Firestore) {
         console.log('@@@', 'DocsService', 'constructor');
@@ -29,19 +27,19 @@ export class DocsService {
 
     aggiornaDocumento(idDocumentoDaAggiornare: string, modificheDaAggiornare: Partial<Doc>): Observable<void> {
         console.log('@@@', 'DocsService', 'aggiornaDocumento', idDocumentoDaAggiornare, modificheDaAggiornare);
-        const documentReference: DocumentReference<Doc> = doc(this.firestore, DocsService.NOME_DELLA_COLLEZIONE, idDocumentoDaAggiornare).withConverter(docConverter);        
+        const documentReference: DocumentReference<Doc> = doc(this.firestore, NOME_DELLA_COLLEZIONE_DOCS, idDocumentoDaAggiornare).withConverter(docConverter);        
         return from(updateDoc(documentReference, modificheDaAggiornare));
     }
 
     eliminaDocumento(idDocumentoDaEliminare: string): Observable<void> {
         console.log('@@@', 'DocsService', 'eliminaDocumento', idDocumentoDaEliminare);
-        const documentReference: DocumentReference<Doc> = doc(this.firestore, DocsService.NOME_DELLA_COLLEZIONE, idDocumentoDaEliminare).withConverter(docConverter);
+        const documentReference: DocumentReference<Doc> = doc(this.firestore, NOME_DELLA_COLLEZIONE_DOCS, idDocumentoDaEliminare).withConverter(docConverter);
         return from(deleteDoc(documentReference));
     }
 
     creaDocumento(datiDelNuovoDocumento: Partial<Doc>) {        
         console.log('@@@', 'DocsService', 'creaNuovoDocumento', datiDelNuovoDocumento);
-        const collectionDocs: CollectionReference<Doc> = collection(this.firestore, DocsService.NOME_DELLA_COLLEZIONE).withConverter(docConverter);        
+        const collectionDocs: CollectionReference<Doc> = collection(this.firestore, NOME_DELLA_COLLEZIONE_DOCS).withConverter(docConverter);        
         return from(addDoc<Partial<Doc>>(collectionDocs, datiDelNuovoDocumento));
     }
 

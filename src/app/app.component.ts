@@ -10,8 +10,8 @@ import {
     fromRef
 } from '@angular/fire/firestore';
 
-import optionsConverter from './models/options.converter';
-import { Mio_Options } from './models/options';
+import optionsConverter from './models/opzioni.converter';
+import { Mio_Options } from './models/opzioni';
 
 @Component({
     selector: 'app-root',
